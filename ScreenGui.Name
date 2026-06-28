@@ -1,5 +1,5 @@
 -- =======================================================
--- ZYNTRIX PREMIUM PANEL ULTIMATE (BẢN FULL PHẦN 1)
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (PHẦN 1: CORE & TAB 1)
 -- =======================================================
 if _G.ZyntrixGlobalLoops then
     for _, conn in pairs(_G.ZyntrixGlobalLoops) do pcall(function() conn:Disconnect() end) end
@@ -9,7 +9,6 @@ end
 repeat task.wait() until game.Players.LocalPlayer
 local LocalPlayer = game.Players.LocalPlayer
 
--- Khởi tạo UI bảo vệ chống trùng lặp
 local oldGui = game.CoreGui:FindFirstChild("ZyntrixPremiumPanel")
 if oldGui then oldGui:Destroy() end
 
@@ -18,14 +17,12 @@ ScreenGui.Name = "ZyntrixPremiumPanel"
 ScreenGui.ResetOnSpawn = false 
 ScreenGui.Parent = game.CoreGui
 
--- Hiệu ứng âm thanh click đặc trưng
 local sound = Instance.new("Sound")
 sound.Name = "ToggleSound"
 sound.SoundId = "rbxassetid://942127495"
 sound.Volume = 0.5
 sound.Parent = ScreenGui
 
--- MAIN FRAME (CHỦ ĐỀ ZYNTRIX DARK CYAN)
 local Main = Instance.new("Frame")
 Main.Parent = ScreenGui
 Main.Size = UDim2.new(0, 230, 0, 280)
@@ -34,7 +31,6 @@ Main.BackgroundColor3 = Color3.fromRGB(20, 24, 32)
 Main.Active = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- TITLE BAR
 local TitleBar = Instance.new("Frame", Main)
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
@@ -46,31 +42,24 @@ TitleLabel.Size = UDim2.new(1, 0, 1, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "ZYNTRIX ULTIMATE HUB"
 TitleLabel.TextColor3 = Color3.new(1, 1, 1)
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextSize = 12
+TitleLabel.Font = Enum.Font.GothamBold; TitleLabel.TextSize = 12
 
--- CHUYỂN ĐỔI TAB BUTTONS
 local Tab1Btn = Instance.new("TextButton", Main)
 Tab1Btn.Size = UDim2.new(0.42, 0, 0, 25)
 Tab1Btn.Position = UDim2.new(0.06, 0, 0, 42)
 Tab1Btn.Text = "Free Tools"
-Tab1Btn.Font = Enum.Font.GothamBold
-Tab1Btn.TextSize = 11
-Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Tab1Btn.TextColor3 = Color3.new(1, 1, 1)
+Tab1Btn.Font = Enum.Font.GothamBold; Tab1Btn.TextSize = 11
+Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255); Tab1Btn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 4)
 
 local Tab2Btn = Instance.new("TextButton", Main)
 Tab2Btn.Size = UDim2.new(0.42, 0, 0, 25)
 Tab2Btn.Position = UDim2.new(0.52, 0, 0, 42)
 Tab2Btn.Text = "Player"
-Tab2Btn.Font = Enum.Font.GothamBold
-Tab2Btn.TextSize = 11
-Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
-Tab2Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
+Tab2Btn.Font = Enum.Font.GothamBold; Tab2Btn.TextSize = 11
+Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48); Tab2Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
 Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 4)
 
--- CONTAINER KHUNG CHỨA GIAO DIỆN CHÍNH
 local Container = Instance.new("Frame", Main)
 Container.Size = UDim2.new(0.92, 0, 0, 195)
 Container.Position = UDim2.new(0.04, 0, 0, 75)
@@ -80,7 +69,6 @@ local function clearContainer()
     for _, item in ipairs(Container:GetChildren()) do item:Destroy() end
 end
 
--- CÁC TRẠNG THÁI HỆ THỐNG LOOPS TRONG GAME
 local speedValue = 16
 local speedActive = false
 local jumpValue = 50
@@ -104,7 +92,7 @@ local function setupInvisParts()
     invisParts = {}
     if char then
         for _, obj in pairs(char:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Transparency == 0 then
+            if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
                 table.insert(invisParts, obj)
             end
         end
@@ -113,7 +101,10 @@ end
 
 local function applyInvisPartsState()
     for _, part in pairs(invisParts) do
-        if part and part.Parent then part.Transparency = invisibleActive and 0.5 or 0 end
+        if part and part.Parent then 
+            part.Transparency = invisibleActive and 0.75 or 0 
+            if part:IsA("Decal") then part.Transparency = invisibleActive and 1 or 0 end
+        end
     end
 end
 
@@ -125,63 +116,39 @@ local function runFlyToolScript()
     local cam = workspace.CurrentCamera
     local tool = Instance.new("Tool")
     local pos, gyro, cf, dir, direction, event
-
-    tool.Name = "Fly Tool"
-    tool.RequiresHandle = false
-    tool.Parent = LocalPlayer.Backpack
-    local speed = 1
-     
+    tool.Name = "Fly Tool"; tool.RequiresHandle = false; tool.Parent = LocalPlayer.Backpack
     tool.Equipped:Connect(function()
-        pos = Instance.new("BodyPosition")
-        gyro = Instance.new("BodyGyro")
-        pos.Position = root.Position
-        pos.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        pos = Instance.new("BodyPosition"); gyro = Instance.new("BodyGyro")
+        pos.Position = root.Position; pos.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         pos.P = 100000; pos.D = 1750; pos.Parent = root
-        gyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        gyro.P = 100000; gyro.D = 2200; gyro.Parent = root
-        humanoid.PlatformStand = true
+        gyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge); gyro.P = 100000; gyro.D = 2200; gyro.Parent = root
         event = run.Heartbeat:Connect(function()
             cf = cam.CFrame.Rotation
-            dir = cf:VectorToObjectSpace(humanoid.MoveDirection * speed)
+            dir = cf:VectorToObjectSpace(humanoid.MoveDirection)
             if dir.Magnitude == 0 then direction = Vector3.new(0,0,0)
             else direction = cf:VectorToWorldSpace(Vector3.new(dir.X, 0, dir.Z).Unit * dir.Magnitude) end
             pos.Position = pos.Position + direction
             gyro.CFrame = cam.CFrame
-            for i, o in ipairs(char:GetChildren()) do
-                if o:IsA("BasePart") then o.CanCollide = false end
-            end
+            for _, o in ipairs(char:GetChildren()) do if o:IsA("BasePart") then o.CanCollide = false end end
             humanoid.PlatformStand = true
         end)
     end)
-     
     tool.Unequipped:Connect(function()
         if event then event:Disconnect() end
-        if pos then pos:Destroy() end
-        if gyro then gyro:Destroy() end
+        if pos then pos:Destroy() end; if gyro then gyro:Destroy() end
         humanoid.PlatformStand = false
     end)
 end
 
 local function executeToolScript(url, title)
     if sound then sound:Play() end
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "ZYNTRIX EXECUTE", Text = "Đang chạy: " .. title, Duration = 2
-    })
+    game:GetService("StarterGui"):SetCore("SendNotification", {Title = "ZYNTRIX EXECUTE", Text = "Đang chạy: " .. title, Duration = 2})
     task.spawn(function()
         local success, result = pcall(function() return game:HttpGet(url) end)
-        if success then
-            pcall(function() loadstring(result)() end)
-        else
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "EXECUTE ERROR", Text = "Không thể tải dữ liệu!", Duration = 2
-            })
-        end
+        if success then pcall(function() loadstring(result)() end) end
     end)
 end
 
--- =======================================================
--- CẤU TRÚC TAB 1: FREE TOOLS
--- =======================================================
 local toolsData = {
     {Name = "🛠️ Gamepass Tools", URL = "https://rawscripts.net/raw/Universal-Script-Gamepass-Tools-30734"},
     {Name = "🚀 Gravity Coil", URL = "https://rawscripts.net/raw/Universal-Script-Gravity-Coil-script-works-in-all-games-63523"},
@@ -191,47 +158,28 @@ local toolsData = {
 
 function loadTab1()
     clearContainer()
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    Tab1Btn.TextColor3 = Color3.new(1, 1, 1)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
-    Tab2Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
-
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255); Tab1Btn.TextColor3 = Color3.new(1, 1, 1)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48); Tab2Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
     local ToolsScroll = Instance.new("ScrollingFrame", Container)
-    ToolsScroll.Size = UDim2.new(1, 0, 1, 0)
-    ToolsScroll.BackgroundTransparency = 1
-    ToolsScroll.ScrollBarThickness = 4
-    ToolsScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
-    ToolsScroll.CanvasSize = UDim2.new(0, 0, 0, 180)
-
+    ToolsScroll.Size = UDim2.new(1, 0, 1, 0); ToolsScroll.BackgroundTransparency = 1; ToolsScroll.ScrollBarThickness = 4
+    ToolsScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255); ToolsScroll.CanvasSize = UDim2.new(0, 0, 0, 180)
     local ListLayout = Instance.new("UIListLayout", ToolsScroll)
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, 5)
-
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder; ListLayout.Padding = UDim.new(0, 5)
     local BtnFly = Instance.new("TextButton", ToolsScroll)
-    BtnFly.Size = UDim2.new(0.96, 0, 0, 28)
-    BtnFly.Text = "🪂 GIVE FLY TOOL (BYPASS)"
-    BtnFly.Font = Enum.Font.GothamBold; BtnFly.TextSize = 11
-    BtnFly.BackgroundColor3 = Color3.fromRGB(0, 130, 90); BtnFly.TextColor3 = Color3.new(1, 1, 1)
+    BtnFly.Size = UDim2.new(0.96, 0, 0, 28); BtnFly.Text = "🪂 GIVE FLY TOOL (BYPASS)"
+    BtnFly.Font = Enum.Font.GothamBold; BtnFly.TextSize = 11; BtnFly.BackgroundColor3 = Color3.fromRGB(0, 130, 90); BtnFly.TextColor3 = Color3.new(1, 1, 1)
     Instance.new("UICorner", BtnFly)
     BtnFly.MouseButton1Click:Connect(function() sound:Play() pcall(runFlyToolScript) end)
-
     for _, tool in ipairs(toolsData) do
         local toolBtn = Instance.new("TextButton", ToolsScroll)
-        toolBtn.Size = UDim2.new(0.96, 0, 0, 28)
-        toolBtn.Text = "  " .. tool.Name
-        toolBtn.TextColor3 = Color3.fromRGB(220, 255, 240)
-        toolBtn.TextXAlignment = Enum.TextXAlignment.Left
-        toolBtn.BackgroundColor3 = Color3.fromRGB(24, 32, 28)
-        toolBtn.Font = Enum.Font.GothamSemibold; toolBtn.TextSize = 11
-        Instance.new("UICorner", toolBtn)
-        
-        toolBtn.MouseButton1Click:Connect(function()
-            executeToolScript(tool.URL, tool.Name)
-        end)
+        toolBtn.Size = UDim2.new(0.96, 0, 0, 28); toolBtn.Text = "  " .. tool.Name; toolBtn.TextColor3 = Color3.fromRGB(220, 255, 240)
+        toolBtn.TextXAlignment = Enum.TextXAlignment.Left; toolBtn.BackgroundColor3 = Color3.fromRGB(24, 32, 28)
+        toolBtn.Font = Enum.Font.GothamSemibold; toolBtn.TextSize = 11; Instance.new("UICorner", toolBtn)
+        toolBtn.MouseButton1Click:Connect(function() executeToolScript(tool.URL, tool.Name) end)
     end
 end
 -- =======================================================
--- HỆ THỐNG ESP TEAM LINE REALTIME (SIÊU TỐI ƯU CHỐNG LAG)
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (PHẦN 2: ESP, TAB 2 & GUI LOOPS)
 -- =======================================================
 local Camera = workspace.CurrentCamera
 local ESPs = {}
@@ -242,14 +190,12 @@ local function updateRoleCache()
     local now = os.clock()
     if now - lastCacheUpdate < 0.5 then return end
     lastCacheUpdate = now
-
     for _, plr in ipairs(game.Players:GetPlayers()) do
         if plr ~= LocalPlayer then
             local bp = plr:FindFirstChild("Backpack")
             local char = plr.Character
             local hasKnife = (bp and bp:FindFirstChild("Knife")) or (char and char:FindFirstChild("Knife"))
             local hasGun = (bp and bp:FindFirstChild("Gun")) or (char and char:FindFirstChild("Gun"))
-
             if hasKnife then roleCache[plr] = "MURDER"
             elseif hasGun then roleCache[plr] = "SHERIFF"
             else roleCache[plr] = "INNOCENT" end
@@ -260,23 +206,15 @@ end
 local function getColor(role)
     if role == "MURDER" then return Color3.fromRGB(255, 0, 0)
     elseif role == "SHERIFF" then return Color3.fromRGB(0, 150, 255)
-    elseif role == "INNOCENT" then return Color3.fromRGB(0, 255, 100)
-    else return Color3.new(1, 1, 1) end
+    else return Color3.fromRGB(0, 255, 100) end
 end
 
 local function createESP(plr)
     if plr == LocalPlayer or ESPs[plr] then return end
     local line = Drawing.new("Line")
-    line.Thickness = 1.5
-    line.Transparency = 0.7
-    line.Visible = false
-
+    line.Thickness = 1.5; line.Transparency = 0.7; line.Visible = false
     local text = Drawing.new("Text")
-    text.Size = 13
-    text.Center = true
-    text.Outline = true
-    text.Visible = false
-
+    text.Size = 13; text.Center = true; text.Outline = true; text.Visible = false
     ESPs[plr] = {Line = line, Text = text}
 end
 
@@ -293,115 +231,85 @@ for _, p in ipairs(game.Players:GetPlayers()) do createESP(p) end
 table.insert(_G.ZyntrixGlobalLoops, game.Players.PlayerAdded:Connect(createESP))
 table.insert(_G.ZyntrixGlobalLoops, game.Players.PlayerRemoving:Connect(removeESP))
 
-table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").RenderStepped:Connect(function()
-    if not espActive then
-        for _, esp in pairs(ESPs) do
-            esp.Line.Visible = false
-            esp.Text.Visible = false
+-- VÒNG LẶP RENDER CHÍNH (XỬ LÝ ESP VÀ FIX LỖI NOCLIP)
+table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Stepped:Connect(function()
+    -- Thực thi Noclip ép tắt va chạm liên tục không bị đẩy bật ra
+    if noclipActive and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetChildren()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
-        return
     end
 
+    -- Xử lý vẽ đồ họa Line ESP
+    if not espActive then
+        for _, esp in pairs(ESPs) do esp.Line.Visible = false; esp.Text.Visible = false end
+        return
+    end
     updateRoleCache()
     local camPos = Camera.CFrame.Position
-    local viewX = Camera.ViewportSize.X / 2
-    local viewY = Camera.ViewportSize.Y
+    local viewX, viewY = Camera.ViewportSize.X / 2, Camera.ViewportSize.Y
 
     for plr, esp in pairs(ESPs) do
         local char = plr.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
         if hrp and char:FindFirstChildOfClass("Humanoid") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
             local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
             if onScreen then
                 local role = roleCache[plr] or "INNOCENT"
                 local color = getColor(role)
-
                 esp.Line.From = Vector2.new(viewX, viewY)
                 esp.Line.To = Vector2.new(pos.X, pos.Y)
-                esp.Line.Color = color
-                esp.Line.Visible = true
-
+                esp.Line.Color = color; esp.Line.Visible = true
                 local dist = (camPos - hrp.Position).Magnitude
                 esp.Text.Text = plr.Name .. " [" .. math.floor(dist) .. "]"
                 esp.Text.Position = Vector2.new(pos.X, pos.Y - 15)
-                esp.Text.Color = color
-                esp.Text.Visible = true
-            else
-                esp.Line.Visible = false; esp.Text.Visible = false
-            end
-        else
-            esp.Line.Visible = false; esp.Text.Visible = false
-        end
+                esp.Text.Color = color; esp.Text.Visible = true
+            else esp.Line.Visible = false; esp.Text.Visible = false end
+        else esp.Line.Visible = false; esp.Text.Visible = false end
     end
 end))
 
--- =======================================================
--- CẤU TRÚC CHI TIẾT TAB 2: PLAYER MODS
--- =======================================================
 local function createInputRow(scrollParent, labelName, defaultVal, onToggle, isActive, currentVal)
     local Row = Instance.new("Frame", scrollParent)
-    Row.Size = UDim2.new(0.96, 0, 0, 30)
-    Row.BackgroundTransparency = 1
-    
+    Row.Size = UDim2.new(0.96, 0, 0, 30); Row.BackgroundTransparency = 1
     local Box = Instance.new("TextBox", Row)
-    Box.Size = UDim2.new(0.28, 0, 1, 0)
-    Box.Text = tostring(currentVal)
+    Box.Size = UDim2.new(0.28, 0, 1, 0); Box.Text = tostring(currentVal)
     Box.BackgroundColor3 = Color3.fromRGB(10, 14, 18); Box.TextColor3 = Color3.new(1, 1, 1)
-    Box.Font = Enum.Font.Gotham; Box.TextSize = 11
-    Instance.new("UICorner", Box)
-    
+    Box.Font = Enum.Font.Gotham; Box.TextSize = 11; Instance.new("UICorner", Box)
     local Btn = Instance.new("TextButton", Row)
     Btn.Size = UDim2.new(0.68, 0, 1, 0); Btn.Position = UDim2.new(0.32, 0, 0, 0)
     Btn.Text = labelName .. (isActive and ": ON" or ": OFF")
     Btn.BackgroundColor3 = isActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
     Btn.TextColor3 = Color3.new(1, 1, 1); Btn.Font = Enum.Font.GothamSemibold; Btn.TextSize = 11
     Instance.new("UICorner", Btn)
-    
     Btn.MouseButton1Click:Connect(function()
-        sound:Play()
-        local num = tonumber(Box.Text) or defaultVal
-        onToggle(Btn, num)
+        sound:Play(); local num = tonumber(Box.Text) or defaultVal; onToggle(Btn, num)
     end)
 end
 
 local function createToggleBtn(scrollParent, labelName, isActive, onToggle)
     local Btn = Instance.new("TextButton", scrollParent)
-    Btn.Size = UDim2.new(0.96, 0, 0, 28)
-    Btn.Text = labelName .. (isActive and ": ON" or ": OFF")
+    Btn.Size = UDim2.new(0.96, 0, 0, 28); Btn.Text = labelName .. (isActive and ": ON" or ": OFF")
     Btn.BackgroundColor3 = isActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
     Btn.TextColor3 = Color3.new(1, 1, 1); Btn.Font = Enum.Font.GothamSemibold; Btn.TextSize = 11
     Instance.new("UICorner", Btn)
-    
-    Btn.MouseButton1Click:Connect(function() sound:Play() onToggle(Btn) end)
+    Btn.MouseButton1Click:Connect(function() sound:Play(); onToggle(Btn) end)
 end
 
 function loadTab2()
     clearContainer()
-    Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
-    Tab1Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
-    Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    Tab2Btn.TextColor3 = Color3.new(1, 1, 1)
-
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48); Tab1Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255); Tab2Btn.TextColor3 = Color3.new(1, 1, 1)
     local PlayerScroll = Instance.new("ScrollingFrame", Container)
-    PlayerScroll.Size = UDim2.new(1, 0, 1, 0)
-    PlayerScroll.BackgroundTransparency = 1
-    PlayerScroll.ScrollBarThickness = 4
-    PlayerScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
-    PlayerScroll.CanvasSize = UDim2.new(0, 0, 0, 375)
-
+    PlayerScroll.Size = UDim2.new(1, 0, 1, 0); PlayerScroll.BackgroundTransparency = 1; PlayerScroll.ScrollBarThickness = 4
+    PlayerScroll.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255); PlayerScroll.CanvasSize = UDim2.new(0, 0, 0, 375)
     local ListLayout = Instance.new("UIListLayout", PlayerScroll)
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, 4)
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder; ListLayout.Padding = UDim.new(0, 4)
 
     createInputRow(PlayerScroll, "Speed", 16, function(btn, num)
         speedActive = not speedActive; speedValue = num
-        if speedActive then 
-            btn.Text = "Speed: ON (" .. speedValue .. ")" 
-            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
-        else 
-            btn.Text = "Speed: OFF" 
-            btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
+        if speedActive then btn.Text = "Speed: ON ("..speedValue..")"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
+        else btn.Text = "Speed: OFF"; btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
             local hum = getHumanoid() if hum then hum.WalkSpeed = 16 end
         end
     end, speedActive, speedValue)
@@ -409,12 +317,8 @@ function loadTab2()
     createInputRow(PlayerScroll, "Jump", 50, function(btn, num)
         jumpActive = not jumpActive; jumpValue = num
         local hum = getHumanoid() if hum then hum.UseJumpPower = true end
-        if jumpActive then 
-            btn.Text = "Jump: ON (" .. jumpValue .. ")" 
-            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
-        else 
-            btn.Text = "Jump: OFF" 
-            btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
+        if jumpActive then btn.Text = "Jump: ON ("..jumpValue..")"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
+        else btn.Text = "Jump: OFF"; btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
             if hum then hum.JumpPower = 50 end
         end
     end, jumpActive, jumpValue)
@@ -441,7 +345,11 @@ function loadTab2()
         invisibleActive = not invisibleActive
         btn.Text = invisibleActive and "Invisible: ON" or "Invisible: OFF"
         btn.BackgroundColor3 = invisibleActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
-        applyInvisPartsState()
+        setupInvisParts(); applyInvisPartsState()
+        local char = LocalPlayer.Character
+        local lowerTorso = char and char:FindFirstChild("LowerTorso")
+        local rootNeck = lowerTorso and lowerTorso:FindFirstChild("Root")
+        if rootNeck and rootNeck:IsA("Motor6D") then rootNeck.Enabled = not invisibleActive end
     end)
 
     createToggleBtn(PlayerScroll, "Hitbox Expander", false, function(btn)
@@ -455,90 +363,63 @@ function loadTab2()
         btn.BackgroundColor3 = espActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
     end)
 
-    createToggleBtn(PlayerScroll, "🎭 Animation Pack FE", false, function(btn)
+    createToggleBtn(PlayerScroll, "Fe Anim Pack", false, function(btn)
         executeToolScript("https://rawscripts.net/raw/Universal-Script-Animation-Pack-FE-88221", "Animation Pack")
         btn.Text = "Animations: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    createToggleBtn(PlayerScroll, "🕺 Gaze Emotes V1", false, function(btn)
+    createToggleBtn(PlayerScroll, "Gaze Emotes", false, function(btn)
         executeToolScript("https://rawscripts.net/raw/Universal-Script-Gaze-emotes-V1-54374", "Gaze Emotes")
         btn.Text = "Gaze Emotes: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    createToggleBtn(PlayerScroll, "⚡ EXECUTE ZYNTRIX CORE", false, function(btn)
-        btn.Text = "EXECUTING CORE..."
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    createToggleBtn(PlayerScroll, "⚡ EXECUTE CORE", false, function(btn)
+        btn.Text = "EXECUTING CORE..."; btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
         task.spawn(function()
-            local success, _ = pcall(function() 
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/ZYNTRIXANDTHIENYEUAF/game.CoreGui/main/Zyntrix"))() 
-            end)
-            if success then
-                btn.Text = "ZYNTRIX CORE: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 170, 120)
-            else
-                btn.Text = "CORE LOAD FAILED!"; btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-                task.wait(1.5)
-                btn.Text = "⚡ EXECUTE ZYNTRIX CORE"; btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
-            end
+            local success, _ = pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/ZYNTRIXANDTHIENYEUAF/game.CoreGui/main/Zyntrix"))() end)
+            if success then btn.Text = "CORE: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 170, 120)
+            else btn.Text = "FAILED!"; btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50); task.wait(1); btn.Text = "⚡ EXECUTE CORE"; btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45) end
         end)
     end)
 end
 
--- KẾT NỐI SỰ KIỆN CHUYỂN TAB VÀ NÚT ẨN/HIỆN GIAO DIỆN
-Tab1Btn.MouseButton1Click:Connect(function() sound:Play() loadTab1() end)
-Tab2Btn.MouseButton1Click:Connect(function() sound:Play() loadTab2() end)
+Tab1Btn.MouseButton1Click:Connect(function() sound:Play(); loadTab1() end)
+Tab2Btn.MouseButton1Click:Connect(function() sound:Play(); loadTab2() end)
 
 local ToggleGuiBtn = Instance.new("TextButton")
-ToggleGuiBtn.Parent = ScreenGui
-ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30)
-ToggleGuiBtn.Position = UDim2.new(0, 10, 0.4, 0)
-ToggleGuiBtn.Text = "HIDE"
-ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32)
-ToggleGuiBtn.BorderColor3 = Color3.fromRGB(0, 170, 255)
-ToggleGuiBtn.BorderSizePixel = 2
-ToggleGuiBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
-ToggleGuiBtn.Font = Enum.Font.GothamBold; ToggleGuiBtn.TextSize = 12
-ToggleGuiBtn.Active = true; ToggleGuiBtn.Draggable = true
-Instance.new("UICorner", ToggleGuiBtn)
+ToggleGuiBtn.Parent = ScreenGui; ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30); ToggleGuiBtn.Position = UDim2.new(0, 10, 0.4, 0)
+ToggleGuiBtn.Text = "HIDE"; ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32); ToggleGuiBtn.BorderColor3 = Color3.fromRGB(0, 170, 255)
+ToggleGuiBtn.BorderSizePixel = 2; ToggleGuiBtn.TextColor3 = Color3.fromRGB(0, 170, 255); ToggleGuiBtn.Font = Enum.Font.GothamBold
+ToggleGuiBtn.TextSize = 12; ToggleGuiBtn.Active = true; ToggleGuiBtn.Draggable = true; Instance.new("UICorner", ToggleGuiBtn)
 
 local isVisible = true
 ToggleGuiBtn.MouseButton1Click:Connect(function()
-    sound:Play()
-    isVisible = not isVisible
-    Main.Visible = isVisible
+    sound:Play(); isVisible = not isVisible; Main.Visible = isVisible
     ToggleGuiBtn.Text = isVisible and "HIDE" or "SHOW"
 end)
 
--- Mặc định load trước Tab 1 khi khởi chạy panel
-loadTab1()
--- =======================================================
--- HỆ THỐNG KẾT NỐI KÉO THẢ MENU CHÍNH (DRAGGABLE)
--- =======================================================
-local UserInputService = game:GetService("UserInputService")
+-- HỆ THỐNG KÉO THẢ MƯỢT MÀ CHO MAIN MENU
 local dragging, dragInput, dragStart, startPos
-
+local UserInputService = game:GetService("UserInputService")
 local function update(input)
     local delta = input.Position - dragStart
     Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-
 TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
+        dragging = true; dragStart = input.Position; startPos = Main.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
     end
 end)
-
 TitleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then update(input) end
 end)
+
+table.insert(_G.ZyntrixGlobalLoops, player.CharacterAdded:Connect(function()
+    invisibleActive = false; noclipActive = false; task.wait(0.5); setupInvisParts()
+end))
+
+loadTab1()
