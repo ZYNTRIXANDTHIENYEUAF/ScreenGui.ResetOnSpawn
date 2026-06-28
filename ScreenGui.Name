@@ -1,5 +1,5 @@
 -- =======================================================
--- ZYNTRIX PREMIUM PANEL ULTIMATE (FULL FIXED 2026)
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 1/2)
 -- =======================================================
 if _G.ZyntrixGlobalLoops then
     for _, conn in pairs(_G.ZyntrixGlobalLoops) do pcall(function() conn:Disconnect() end) end
@@ -34,7 +34,7 @@ Main.BackgroundColor3 = Color3.fromRGB(20, 24, 32)
 Main.Active = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- TITLE BAR
+-- TITLE BAR (XANH CYAN ĐẬM CHẤT ZYNTRIX)
 local TitleBar = Instance.new("Frame", Main)
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
@@ -179,9 +179,7 @@ local function executeToolScript(url, title)
     end)
 end
 
--- =======================================================
--- CẤU TRÚC TAB 1: FREE TOOLS (ĐÃ KHÔI PHỤC)
--- =======================================================
+-- CẤU TRÚC TAB 1: FREE TOOLS
 local toolsData = {
     {Name = "🛠️ Gamepass Tools", URL = "https://rawscripts.net/raw/Universal-Script-Gamepass-Tools-30734"},
     {Name = "🚀 Gravity Coil", URL = "https://rawscripts.net/raw/Universal-Script-Gravity-Coil-script-works-in-all-games-63523"},
@@ -230,10 +228,11 @@ local function loadTab1()
         end)
     end
 end
+-- =======================================================
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 2/2)
+-- =======================================================
 
--- =======================================================
--- CẤU TRÚC TAB 2: PLAYER MODS
--- =======================================================
+-- CẤU TRÚC TAB 2: PLAYER MODS (CÓ CHỨC NĂNG 11 ZYNTRIX CORE)
 local function createInputRow(scrollParent, labelName, defaultVal, onToggle, isActive, currentVal)
     local Row = Instance.new("Frame", scrollParent)
     Row.Size = UDim2.new(0.96, 0, 0, 30)
@@ -271,72 +270,22 @@ local function createToggleBtn(scrollParent, labelName, isActive, onToggle)
     Btn.MouseButton1Click:Connect(function() sound:Play() onToggle(Btn) end)
 end
 
--- HỆ THỐNG ESP
-local Camera = workspace.CurrentCamera
-local function removeESP(player)
-    if player.Character then
-        local oldHighlight = player.Character:FindFirstChild("ZyntrixHighlightESP")
-        if oldHighlight then oldHighlight:Destroy() end
-    end
-    if player:GetAttribute("ZyntrixLine") then
-        local line = player:GetAttribute("ZyntrixLine")
-        pcall(function() line:Remove() end)
-        player:SetAttribute("ZyntrixLine", nil)
-    end
-end
-
-local function clearAllESP()
-    for _, p in pairs(game.Players:GetPlayers()) do removeESP(p) end
-end
-
-local function applyESP(p)
-    if p == LocalPlayer then return end
-    if espActive and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-        local hl = p.Character:FindFirstChild("ZyntrixHighlightESP")
-        if not hl then
-            hl = Instance.new("Highlight")
-            hl.Name = "ZyntrixHighlightESP"
-            hl.FillColor = Color3.fromRGB(0, 170, 255)
-            hl.FillTransparency = 0.6
-            hl.OutlineColor = Color3.new(1, 1, 1)
-            hl.Parent = p.Character
-        end
-    else
-        local hl = p.Character and p.Character:FindFirstChild("ZyntrixHighlightESP")
-        if hl then hl:Destroy() end
-    end
-
-    if espActive and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-        local line = p:GetAttribute("ZyntrixLine")
-        if not line then
-            line = Drawing.new("Line")
-            line.Color = Color3.fromRGB(0, 170, 255)
-            line.Thickness = 1.5
-            line.Transparency = 0.8
-            p:SetAttribute("ZyntrixLine", line)
-        end
-        local hrp = p.Character.HumanoidRootPart
-        local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-        if onScreen then
-            line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-            line.To = Vector2.new(screenPos.X, screenPos.Y)
-            line.Visible = true
-        else line.Visible = false end
-    else
-        if p:GetAttribute("ZyntrixLine") then p:GetAttribute("ZyntrixLine").Visible = false end
-    end
-end
-
-task.spawn(function()
-    while true do
-        task.wait(0.03)
-        if espActive then
-            for _, p in pairs(game.Players:GetPlayers()) do pcall(function() applyESP(p) end) end
+local function updateESPViend()
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local hl = p.Character:FindFirstChild("ZyntrixHighlightESP")
+            if espActive then
+                if not hl then
+                    hl = Instance.new("Highlight")
+                    hl.Name = "ZyntrixHighlightESP"
+                    hl.FillColor = Color3.fromRGB(0, 170, 255); hl.FillTransparency = 0.6
+                    hl.OutlineColor = Color3.new(1, 1, 1); hl.OutlineTransparency = 0
+                    hl.Parent = p.Character
+                end
+            else if hl then hl:Destroy() end end
         end
     end
-end)
-
-game.Players.PlayerRemoving:Connect(function(p) removeESP(p) end)
+end
 
 local function loadTab2()
     clearContainer()
@@ -403,11 +352,11 @@ local function loadTab2()
         btn.Text = "Hitbox: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    createToggleBtn(PlayerScroll, "ESP Viền + Line", espActive, function(btn)
+    createToggleBtn(PlayerScroll, "ESP Viền Player", espActive, function(btn)
         espActive = not espActive
-        btn.Text = espActive and "ESP: ON" or "ESP: OFF"
+        btn.Text = espActive and "ESP Viền: ON" or "ESP Viền: OFF"
         btn.BackgroundColor3 = espActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
-        if not espActive then clearAllESP() end
+        updateESPViend()
     end)
 
     createToggleBtn(PlayerScroll, "🎭 Animation Pack FE", false, function(btn)
@@ -420,6 +369,7 @@ local function loadTab2()
         btn.Text = "Gaze Emotes: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
+    -- CHỨC NĂNG 11: EXECUTE ZYNTRIX CORE
     createToggleBtn(PlayerScroll, "⚡ EXECUTE ZYNTRIX CORE", false, function(btn)
         btn.Text = "EXECUTING CORE..."
         btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
@@ -428,11 +378,14 @@ local function loadTab2()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/ZYNTRIXANDTHIENYEUAF/game.CoreGui/main/Zyntrix"))() 
             end)
             if success then
-                btn.Text = "ZYNTRIX CORE: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 170, 120)
+                btn.Text = "ZYNTRIX CORE: LOADED"
+                btn.BackgroundColor3 = Color3.fromRGB(0, 170, 120)
             else
-                btn.Text = "CORE LOAD FAILED!"; btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+                btn.Text = "CORE LOAD FAILED!"
+                btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
                 task.wait(1.5)
-                btn.Text = "⚡ EXECUTE ZYNTRIX CORE"; btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
+                btn.Text = "⚡ EXECUTE ZYNTRIX CORE"
+                btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
             end
         end)
     end)
@@ -461,7 +414,81 @@ ToggleGuiBtn.MouseButton1Click:Connect(function()
     isVisible = not isVisible
     Main.Visible = isVisible
     ToggleGuiBtn.Text = isVisible and "HIDE" or "SHOW"
+    ToggleGuiBtn.BackgroundColor3 = isVisible and Color3.fromRGB(20, 24, 32) or Color3.fromRGB(0, 170, 255)
+    ToggleGuiBtn.TextColor3 = isVisible and Color3.fromRGB(0, 170, 255) or Color3.new(1, 1, 1)
 end)
 
--- Nạp sẵn Tab 1 khi mở menu lần đầu
+local dragging, dragStart, startPos = false, nil, nil
+local UIS = game:GetService("UserInputService")
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = Main.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
+
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.G then
+        if sound then sound:Play() end
+        invisibleActive = not invisibleActive
+        applyInvisPartsState()
+        if Main.Visible and Tab2Btn.BackgroundColor3 == Color3.fromRGB(0, 170, 255) then loadTab2() end
+    end
+end)
+
+-- VÒNG LẶP HỆ THỐNG LOOPS CHẠY NGẦM
+setupInvisParts()
+
+table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Heartbeat:Connect(function()
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    
+    if hum and hum.Health > 0 then
+        if speedActive then hum.WalkSpeed = speedValue end
+        if jumpActive then hum.JumpPower = jumpValue end
+        if godModeActive then hum.MaxHealth = math.huge; hum.Health = math.huge end
+    end
+    
+    if noclipActive and char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
+    
+    if invisibleActive and root and hum and root.Parent and hum.Parent then
+        local oldCF = root.CFrame
+        local oldOffset = hum.CameraOffset
+        local hiddenCF = oldCF * CFrame.new(0, -200000, 0)
+        root.CFrame = hiddenCF
+        hum.CameraOffset = hiddenCF:ToObjectSpace(CFrame.new(oldCF.Position)).Position
+        game:GetService("RunService").RenderStepped:Wait()
+        if root and hum and root.Parent and hum.Parent then
+            root.CFrame = oldCF; hum.CameraOffset = oldOffset
+        end
+    end
+end))
+
+table.insert(_G.ZyntrixGlobalLoops, UIS.JumpRequest:Connect(function()
+    if infJumpActive then
+        local hum = getHumanoid()
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end))
+
+table.insert(_G.ZyntrixGlobalLoops, LocalPlayer.CharacterAdded:Connect(function()
+    invisibleActive = false; task.wait(0.5); setupInvisParts()
+end))
+
 loadTab1()
