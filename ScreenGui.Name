@@ -231,6 +231,9 @@ end
 -- =======================================================
 -- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 2/2)
 -- =======================================================
+-- =======================================================
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 2/2 - ESP UPDATE)
+-- =======================================================
 
 -- CẤU TRÚC TAB 2: PLAYER MODS (CÓ CHỨC NĂNG 11 ZYNTRIX CORE)
 local function createInputRow(scrollParent, labelName, defaultVal, onToggle, isActive, currentVal)
@@ -270,23 +273,100 @@ local function createToggleBtn(scrollParent, labelName, isActive, onToggle)
     Btn.MouseButton1Click:Connect(function() sound:Play() onToggle(Btn) end)
 end
 
-local function updateESPViend()
+-- =======================================================
+-- HỆ THỐNG ESP QUÉT TỰ ĐỘNG (AUTO-UPDATE HIGHLIGHT & TRACER LINE)
+-- =======================================================
+local Camera = workspace.CurrentCamera
+
+-- Hàm xóa ESP của một người chơi cụ thể
+local function removeESP(player)
+    if player.Character then
+        local oldHighlight = player.Character:FindFirstChild("ZyntrixHighlightESP")
+        if oldHighlight then oldHighlight:Destroy() end
+    end
+    if player:GetAttribute("ZyntrixLine") then
+        local line = player:GetAttribute("ZyntrixLine")
+        pcall(function() line:Remove() end)
+        player:SetAttribute("ZyntrixLine", nil)
+    end
+end
+
+-- Hàm dọn sạch toàn bộ ESP khi tắt nút
+local function clearAllESP()
     for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("ZyntrixHighlightESP")
-            if espActive then
-                if not hl then
-                    hl = Instance.new("Highlight")
-                    hl.Name = "ZyntrixHighlightESP"
-                    hl.FillColor = Color3.fromRGB(0, 170, 255); hl.FillTransparency = 0.6
-                    hl.OutlineColor = Color3.new(1, 1, 1); hl.OutlineTransparency = 0
-                    hl.Parent = p.Character
-                end
-            else if hl then hl:Destroy() end end
+        removeESP(p)
+    end
+end
+
+-- Hàm xử lý và cập nhật ESP (Viền + Line khoảng cách) cho từng người chơi
+local function applyESP(p)
+    if p == LocalPlayer then return end
+    
+    -- 1. Xử lý phần VIỀN (Highlight)
+    if espActive and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+        local hl = p.Character:FindFirstChild("ZyntrixHighlightESP")
+        if not hl then
+            hl = Instance.new("Highlight")
+            hl.Name = "ZyntrixHighlightESP"
+            hl.FillColor = Color3.fromRGB(0, 170, 255)
+            hl.FillTransparency = 0.6
+            hl.OutlineColor = Color3.new(1, 1, 1)
+            hl.OutlineTransparency = 0
+            hl.Parent = p.Character
+        end
+    else
+        local hl = p.Character and p.Character:FindFirstChild("ZyntrixHighlightESP")
+        if hl then hl:Destroy() end
+    end
+
+    -- 2. Xử lý phần LINE KHOẢNG CÁCH (Tracer Line bằng Drawing API)
+    if espActive and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+        local line = p:GetAttribute("ZyntrixLine")
+        if not line then
+            line = Drawing.new("Line")
+            line.Color = Color3.fromRGB(0, 170, 255)
+            line.Thickness = 1.5
+            line.Transparency = 0.8
+            p:SetAttribute("ZyntrixLine", line)
+        end
+        
+        -- Cập nhật tọa độ từ chân màn hình đến vị trí người chơi
+        local hrp = p.Character.HumanoidRootPart
+        local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+        
+        if onScreen then
+            line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Gốc từ giữa cạnh dưới màn hình
+            line.To = Vector2.new(screenPos.X, screenPos.Y)
+            line.Visible = true
+        else
+            line.Visible = false
+        end
+    else
+        if p:GetAttribute("ZyntrixLine") then
+            local line = p:GetAttribute("ZyntrixLine")
+            line.Visible = false
         end
     end
 end
 
+-- Khởi động vòng lặp tự động cập nhật ESP khi bật
+task.spawn(function()
+    while true do
+        task.wait(0.03) -- Chạy mượt mà khoảng 30 FPS để không gây lag máy
+        if espActive then
+            for _, p in pairs(game.Players:GetPlayers()) do
+                pcall(function() applyESP(p) end)
+            end
+        end
+    end
+end)
+
+-- Tự động dọn dẹp bộ nhớ khi có người thoát phòng
+game.Players.PlayerRemoving:Connect(function(p)
+    removeESP(p)
+end)
+
+-- Giao diện quản lý Tab 2
 local function loadTab2()
     clearContainer()
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
@@ -352,11 +432,12 @@ local function loadTab2()
         btn.Text = "Hitbox: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    createToggleBtn(PlayerScroll, "ESP Viền Player", espActive, function(btn)
+    -- Nút bật tắt hệ thống ESP tự động cập nhật mới
+    createToggleBtn(PlayerScroll, "ESP Viền + Line", espActive, function(btn)
         espActive = not espActive
-        btn.Text = espActive and "ESP Viền: ON" or "ESP Viền: OFF"
+        btn.Text = espActive and "ESP: ON" or "ESP: OFF"
         btn.BackgroundColor3 = espActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
-        updateESPViend()
+        if not espActive then clearAllESP() end
     end)
 
     createToggleBtn(PlayerScroll, "🎭 Animation Pack FE", false, function(btn)
@@ -369,7 +450,6 @@ local function loadTab2()
         btn.Text = "Gaze Emotes: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    -- CHỨC NĂNG 11: EXECUTE ZYNTRIX CORE
     createToggleBtn(PlayerScroll, "⚡ EXECUTE ZYNTRIX CORE", false, function(btn)
         btn.Text = "EXECUTING CORE..."
         btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
@@ -492,4 +572,3 @@ table.insert(_G.ZyntrixGlobalLoops, LocalPlayer.CharacterAdded:Connect(function(
 end))
 
 loadTab1()
-
