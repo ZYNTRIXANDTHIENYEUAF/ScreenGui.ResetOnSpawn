@@ -9,7 +9,6 @@ end
 repeat task.wait() until game.Players.LocalPlayer
 local LocalPlayer = game.Players.LocalPlayer
 
--- Khởi tạo UI bảo vệ chống trùng lặp
 local oldGui = game.CoreGui:FindFirstChild("ZyntrixPremiumPanel")
 if oldGui then oldGui:Destroy() end
 
@@ -18,14 +17,12 @@ ScreenGui.Name = "ZyntrixPremiumPanel"
 ScreenGui.ResetOnSpawn = false 
 ScreenGui.Parent = game.CoreGui
 
--- Hiệu ứng âm thanh click đặc trưng
 local sound = Instance.new("Sound")
 sound.Name = "ToggleSound"
 sound.SoundId = "rbxassetid://942127495"
 sound.Volume = 0.5
 sound.Parent = ScreenGui
 
--- MAIN FRAME (CHỦ ĐỀ ZYNTRIX DARK CYAN)
 local Main = Instance.new("Frame")
 Main.Parent = ScreenGui
 Main.Size = UDim2.new(0, 230, 0, 280)
@@ -34,7 +31,6 @@ Main.BackgroundColor3 = Color3.fromRGB(20, 24, 32)
 Main.Active = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- TITLE BAR (THANH TIÊU ĐỀ DÙNG ĐỂ KÉO)
 local TitleBar = Instance.new("Frame", Main)
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
@@ -46,31 +42,24 @@ TitleLabel.Size = UDim2.new(1, 0, 1, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "ZYNTRIX ULTIMATE HUB"
 TitleLabel.TextColor3 = Color3.new(1, 1, 1)
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextSize = 12
+TitleLabel.Font = Enum.Font.GothamBold; TitleLabel.TextSize = 12
 
--- CHUYỂN ĐỔI TAB BUTTONS
 local Tab1Btn = Instance.new("TextButton", Main)
 Tab1Btn.Size = UDim2.new(0.42, 0, 0, 25)
 Tab1Btn.Position = UDim2.new(0.06, 0, 0, 42)
 Tab1Btn.Text = "Free Tools"
-Tab1Btn.Font = Enum.Font.GothamBold
-Tab1Btn.TextSize = 11
-Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Tab1Btn.TextColor3 = Color3.new(1, 1, 1)
+Tab1Btn.Font = Enum.Font.GothamBold; Tab1Btn.TextSize = 11
+Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255); Tab1Btn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 4)
 
 local Tab2Btn = Instance.new("TextButton", Main)
 Tab2Btn.Size = UDim2.new(0.42, 0, 0, 25)
 Tab2Btn.Position = UDim2.new(0.52, 0, 0, 42)
 Tab2Btn.Text = "Player"
-Tab2Btn.Font = Enum.Font.GothamBold
-Tab2Btn.TextSize = 11
-Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
-Tab2Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
+Tab2Btn.Font = Enum.Font.GothamBold; Tab2Btn.TextSize = 11
+Tab2Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48); Tab2Btn.TextColor3 = Color3.fromRGB(0, 170, 255)
 Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 4)
 
--- CONTAINER KHUNG CHỨA GIAO DIỆN CHÍNH
 local Container = Instance.new("Frame", Main)
 Container.Size = UDim2.new(0.92, 0, 0, 195)
 Container.Position = UDim2.new(0.04, 0, 0, 75)
@@ -80,7 +69,6 @@ local function clearContainer()
     for _, item in ipairs(Container:GetChildren()) do item:Destroy() end
 end
 
--- QUẢN LÝ TRẠNG THÁI LOOPS HỆ THỐNG
 local speedValue = 16
 local speedActive = false
 local jumpValue = 50
@@ -104,7 +92,7 @@ local function setupInvisParts()
     invisParts = {}
     if char then
         for _, obj in pairs(char:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Transparency == 0 then
+            if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
                 table.insert(invisParts, obj)
             end
         end
@@ -114,7 +102,8 @@ end
 local function applyInvisPartsState()
     for _, part in pairs(invisParts) do
         if part and part.Parent then 
-            part.Transparency = invisibleActive and 0.5 or 0 
+            part.Transparency = invisibleActive and 0.75 or 0 
+            if part:IsA("Decal") then part.Transparency = invisibleActive and 1 or 0 end
         end
     end
 end
@@ -190,7 +179,7 @@ function loadTab1()
     end
 end
 -- =======================================================
--- ZYNTRIX PREMIUM PANEL ULTIMATE (PHẦN 2: ESP, TAB 2 & LOOPS)
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (PHẦN 2: ESP, TAB 2 & GUI LOOPS)
 -- =======================================================
 local Camera = workspace.CurrentCamera
 local ESPs = {}
@@ -242,39 +231,16 @@ for _, p in ipairs(game.Players:GetPlayers()) do createESP(p) end
 table.insert(_G.ZyntrixGlobalLoops, game.Players.PlayerAdded:Connect(createESP))
 table.insert(_G.ZyntrixGlobalLoops, game.Players.PlayerRemoving:Connect(removeESP))
 
--- HỆ THỐNG VÒNG LẶP KẾT HỢP: NOCLIP VÀ TÀNG HÌNH DÌM TỌA ĐỘ GỐC CỦA NÍ
-table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Heartbeat:Connect(function()
-    local character = LocalPlayer.Character
-    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-    -- 1. Xử lý Noclip xuyên tường liên tục trên vòng lặp Heartbeat
-    if noclipActive and character then
-        for _, part in pairs(character:GetChildren()) do
+-- VÒNG LẶP RENDER CHÍNH (XỬ LÝ ESP VÀ FIX LỖI NOCLIP)
+table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Stepped:Connect(function()
+    -- Thực thi Noclip ép tắt va chạm liên tục không bị đẩy bật ra
+    if noclipActive and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetChildren()) do
             if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 
-    -- 2. Xử lý logic Tàng hình hạ tọa độ gốc sâu dưới lòng đất (-200000) của ní
-    if invisibleActive and rootPart and humanoid and rootPart.Parent and humanoid.Parent then
-        local cf = rootPart.CFrame
-        local camOffset = humanoid.CameraOffset
-        local hidden = cf * CFrame.new(0, -200000, 0)
-        
-        rootPart.CFrame = hidden
-        humanoid.CameraOffset = hidden:ToObjectSpace(CFrame.new(cf.Position)).Position
-        
-        game:GetService("RunService").RenderStepped:Wait()
-        
-        if rootPart and humanoid and rootPart.Parent and humanoid.Parent then
-            rootPart.CFrame = cf
-            humanoid.CameraOffset = camOffset
-        end
-    end
-end))
-
--- Vòng lặp RenderStepped độc lập tối ưu đồ họa đường truyền Line ESP chống lag
-table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").RenderStepped:Connect(function()
+    -- Xử lý vẽ đồ họa Line ESP
     if not espActive then
         for _, esp in pairs(ESPs) do esp.Line.Visible = false; esp.Text.Visible = false end
         return
@@ -375,13 +341,15 @@ function loadTab2()
         btn.BackgroundColor3 = godModeActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
     end)
 
-    -- NÚT BẬT/TẮT TÀNG HÌNH KIỂU CŨ HẠ TỌA ĐỘ TRÊN TAB 2
     createToggleBtn(PlayerScroll, "Invisible (Key G)", invisibleActive, function(btn)
         invisibleActive = not invisibleActive
         btn.Text = invisibleActive and "Invisible: ON" or "Invisible: OFF"
         btn.BackgroundColor3 = invisibleActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
-        setupInvisParts()
-        applyInvisPartsState()
+        setupInvisParts(); applyInvisPartsState()
+        local char = LocalPlayer.Character
+        local lowerTorso = char and char:FindFirstChild("LowerTorso")
+        local rootNeck = lowerTorso and lowerTorso:FindFirstChild("Root")
+        if rootNeck and rootNeck:IsA("Motor6D") then rootNeck.Enabled = not invisibleActive end
     end)
 
     createToggleBtn(PlayerScroll, "Hitbox Expander", false, function(btn)
@@ -415,20 +383,9 @@ function loadTab2()
     end)
 end
 
--- LẮNG NGHE SỰ KIỆN PHÍM G TRÊN MÁY TÍNH ĐỂ TÀNG HÌNH NHANH
-table.insert(_G.ZyntrixGlobalLoops, LocalPlayer:GetMouse().KeyDown:Connect(function(key)
-    if key == "g" then
-        invisibleActive = not invisibleActive
-        setupInvisParts()
-        applyInvisPartsState()
-    end
-end))
-
--- KẾT NỐI CHUYỂN TAB 1 VÀ TAB 2 XỬ LÝ CLICK SỰ KIỆN
 Tab1Btn.MouseButton1Click:Connect(function() sound:Play(); loadTab1() end)
 Tab2Btn.MouseButton1Click:Connect(function() sound:Play(); loadTab2() end)
 
--- KHỞI TẠO NÚT BẤM HIDE / SHOW KHẨN CẤP CHO MOBILE
 local ToggleGuiBtn = Instance.new("TextButton")
 ToggleGuiBtn.Parent = ScreenGui; ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30); ToggleGuiBtn.Position = UDim2.new(0, 10, 0.4, 0)
 ToggleGuiBtn.Text = "HIDE"; ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32); ToggleGuiBtn.BorderColor3 = Color3.fromRGB(0, 170, 255)
@@ -441,7 +398,7 @@ ToggleGuiBtn.MouseButton1Click:Connect(function()
     ToggleGuiBtn.Text = isVisible and "HIDE" or "SHOW"
 end)
 
--- HỆ THỐNG KÉO THẢ MƯỢT MÀ KHÔNG LAG TRÊN KHUNG TITLEBAR CHÍNH
+-- HỆ THỐNG KÉO THẢ MƯỢT MÀ CHO MAIN MENU
 local dragging, dragInput, dragStart, startPos
 local UserInputService = game:GetService("UserInputService")
 local function update(input)
@@ -461,10 +418,8 @@ UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then update(input) end
 end)
 
--- RESET TRẠNG THÁI KHI NHÂN VẬT CHẾT HOẶC HỒI SINH TRONG TRẬN
-table.insert(_G.ZyntrixGlobalLoops, LocalPlayer.CharacterAdded:Connect(function()
+table.insert(_G.ZyntrixGlobalLoops, player.CharacterAdded:Connect(function()
     invisibleActive = false; noclipActive = false; task.wait(0.5); setupInvisParts()
 end))
 
--- KÍCH HOẠT KHỞI ĐỘNG BAN ĐẦU
 loadTab1()
