@@ -242,20 +242,20 @@ for _, p in ipairs(game.Players:GetPlayers()) do createESP(p) end
 table.insert(_G.ZyntrixGlobalLoops, game.Players.PlayerAdded:Connect(createESP))
 table.insert(_G.ZyntrixGlobalLoops, game.Players.PlayerRemoving:Connect(removeESP))
 
--- HỆ THỐNG VÒNG LẶP KẾT HỢP: NOCLIP VÀ TÀNG HÌNH DÌM TỌA ĐỘ CŨ CỦA NÍ
+-- HỆ THỐNG VÒNG LẶP KẾT HỢP: NOCLIP VÀ TÀNG HÌNH DÌM TỌA ĐỘ GỐC CỦA NÍ
 table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Heartbeat:Connect(function()
     local character = LocalPlayer.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 
-    -- 1. Xử lý Noclip xuyên tường liên tục trên vòng lặp
+    -- 1. Xử lý Noclip xuyên tường liên tục trên vòng lặp Heartbeat
     if noclipActive and character then
         for _, part in pairs(character:GetChildren()) do
             if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 
-    -- 2. Xử lý logic Tàng hình hạ tọa độ gốc của ní (Giữ nguyên cơ chế cũ của ní)
+    -- 2. Xử lý logic Tàng hình hạ tọa độ gốc sâu dưới lòng đất (-200000) của ní
     if invisibleActive and rootPart and humanoid and rootPart.Parent and humanoid.Parent then
         local cf = rootPart.CFrame
         local camOffset = humanoid.CameraOffset
@@ -273,7 +273,7 @@ table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Heartbeat:Conn
     end
 end))
 
--- Vòng lặp RenderStepped riêng để vẽ ESP chống lag
+-- Vòng lặp RenderStepped độc lập tối ưu đồ họa đường truyền Line ESP chống lag
 table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").RenderStepped:Connect(function()
     if not espActive then
         for _, esp in pairs(ESPs) do esp.Line.Visible = false; esp.Text.Visible = false end
@@ -375,7 +375,7 @@ function loadTab2()
         btn.BackgroundColor3 = godModeActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
     end)
 
-    -- NÚT BẬT TÀNG HÌNH KIỂU CŨ (HẠ TỌA ĐỘ - ĐÃ ĐỒNG BỘ)
+    -- NÚT BẬT/TẮT TÀNG HÌNH KIỂU CŨ HẠ TỌA ĐỘ TRÊN TAB 2
     createToggleBtn(PlayerScroll, "Invisible (Key G)", invisibleActive, function(btn)
         invisibleActive = not invisibleActive
         btn.Text = invisibleActive and "Invisible: ON" or "Invisible: OFF"
@@ -415,7 +415,7 @@ function loadTab2()
     end)
 end
 
--- PHÍM G TẮT NHANH TÀNG HÌNH KIỂU CŨ CHO PC
+-- LẮNG NGHE SỰ KIỆN PHÍM G TRÊN MÁY TÍNH ĐỂ TÀNG HÌNH NHANH
 table.insert(_G.ZyntrixGlobalLoops, LocalPlayer:GetMouse().KeyDown:Connect(function(key)
     if key == "g" then
         invisibleActive = not invisibleActive
@@ -424,9 +424,11 @@ table.insert(_G.ZyntrixGlobalLoops, LocalPlayer:GetMouse().KeyDown:Connect(funct
     end
 end))
 
+-- KẾT NỐI CHUYỂN TAB 1 VÀ TAB 2 XỬ LÝ CLICK SỰ KIỆN
 Tab1Btn.MouseButton1Click:Connect(function() sound:Play(); loadTab1() end)
 Tab2Btn.MouseButton1Click:Connect(function() sound:Play(); loadTab2() end)
 
+-- KHỞI TẠO NÚT BẤM HIDE / SHOW KHẨN CẤP CHO MOBILE
 local ToggleGuiBtn = Instance.new("TextButton")
 ToggleGuiBtn.Parent = ScreenGui; ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30); ToggleGuiBtn.Position = UDim2.new(0, 10, 0.4, 0)
 ToggleGuiBtn.Text = "HIDE"; ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32); ToggleGuiBtn.BorderColor3 = Color3.fromRGB(0, 170, 255)
@@ -439,7 +441,7 @@ ToggleGuiBtn.MouseButton1Click:Connect(function()
     ToggleGuiBtn.Text = isVisible and "HIDE" or "SHOW"
 end)
 
--- HỆ THỐNG KÉO THẢ MƯỢT MÀ CHO MAIN MENU
+-- HỆ THỐNG KÉO THẢ MƯỢT MÀ KHÔNG LAG TRÊN KHUNG TITLEBAR CHÍNH
 local dragging, dragInput, dragStart, startPos
 local UserInputService = game:GetService("UserInputService")
 local function update(input)
@@ -459,8 +461,10 @@ UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then update(input) end
 end)
 
+-- RESET TRẠNG THÁI KHI NHÂN VẬT CHẾT HOẶC HỒI SINH TRONG TRẬN
 table.insert(_G.ZyntrixGlobalLoops, LocalPlayer.CharacterAdded:Connect(function()
     invisibleActive = false; noclipActive = false; task.wait(0.5); setupInvisParts()
 end))
 
+-- KÍCH HOẠT KHỞI ĐỘNG BAN ĐẦU
 loadTab1()
