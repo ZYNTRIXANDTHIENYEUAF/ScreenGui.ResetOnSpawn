@@ -352,12 +352,12 @@ local function loadTab2()
         btn.Text = "Hitbox: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    createToggleBtn(PlayerScroll, "ESP Viền Player", espActive, function(btn)
+        createToggleBtn(PlayerScroll, "ESP Team Line (MM2)", espActive, function(btn)
         espActive = not espActive
-        btn.Text = espActive and "ESP Viền: ON" or "ESP Viền: OFF"
+        btn.Text = espActive and "ESP PLAYER: ON" or "ESP PLAYER: OFF"
         btn.BackgroundColor3 = espActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
-        updateESPViend()
     end)
+
 
     createToggleBtn(PlayerScroll, "🎭 Animation Pack FE", false, function(btn)
         executeToolScript("https://rawscripts.net/raw/Universal-Script-Animation-Pack-FE-88221", "Animation Pack")
