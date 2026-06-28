@@ -80,7 +80,7 @@ local function clearContainer()
     for _, item in ipairs(Container:GetChildren()) do item:Destroy() end
 end
 
--- QUẢN LÝ TRẠNG THÁI TOOPS HỆ THỐNG
+-- QUẢN LÝ TRẠNG THÁI LOOPS HỆ THỐNG
 local speedValue = 16
 local speedActive = false
 local jumpValue = 50
@@ -88,7 +88,7 @@ local jumpActive = false
 local infJumpActive = false
 local noclipActive = false
 local godModeActive = false
-local invisibleActive = false -- Biến trạng thái tàng hình cũ công khai
+local invisibleActive = false
 local espActive = false
 local invisParts = {}
 
@@ -255,7 +255,7 @@ table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Heartbeat:Conn
         end
     end
 
-    -- 2. Xử lý logic Tàng hình hạ tọa độ gốc của ní (Đã sửa liên kết biến mượt mà)
+    -- 2. Xử lý logic Tàng hình hạ tọa độ gốc của ní (Giữ nguyên cơ chế cũ của ní)
     if invisibleActive and rootPart and humanoid and rootPart.Parent and humanoid.Parent then
         local cf = rootPart.CFrame
         local camOffset = humanoid.CameraOffset
@@ -375,7 +375,7 @@ function loadTab2()
         btn.BackgroundColor3 = godModeActive and Color3.fromRGB(0, 120, 180) or Color3.fromRGB(35, 40, 45)
     end)
 
-    -- NÚT BẬT TÀNG HÌNH KIỂU CŨ (HẠ TỌA ĐỘ - NÍ MUỐN GIỮ KIỂU NÀY)
+    -- NÚT BẬT TÀNG HÌNH KIỂU CŨ (HẠ TỌA ĐỘ - ĐÃ ĐỒNG BỘ)
     createToggleBtn(PlayerScroll, "Invisible (Key G)", invisibleActive, function(btn)
         invisibleActive = not invisibleActive
         btn.Text = invisibleActive and "Invisible: ON" or "Invisible: OFF"
@@ -415,8 +415,8 @@ function loadTab2()
     end)
 end
 
--- PHÍM G TẮT NHANH TÀNG HÌNH KIỂU CŨ
-table.insert(_G.ZyntrixGlobalLoops, player:GetMouse().KeyDown:Connect(function(key)
+-- PHÍM G TẮT NHANH TÀNG HÌNH KIỂU CŨ CHO PC
+table.insert(_G.ZyntrixGlobalLoops, LocalPlayer:GetMouse().KeyDown:Connect(function(key)
     if key == "g" then
         invisibleActive = not invisibleActive
         setupInvisParts()
@@ -464,4 +464,3 @@ table.insert(_G.ZyntrixGlobalLoops, LocalPlayer.CharacterAdded:Connect(function(
 end))
 
 loadTab1()
-
