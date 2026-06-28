@@ -1,5 +1,5 @@
 -- =======================================================
--- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 1/2)
+-- ZYNTRIX PREMIUM PANEL ULTIMATE (FULL FIXED 2026)
 -- =======================================================
 if _G.ZyntrixGlobalLoops then
     for _, conn in pairs(_G.ZyntrixGlobalLoops) do pcall(function() conn:Disconnect() end) end
@@ -34,7 +34,7 @@ Main.BackgroundColor3 = Color3.fromRGB(20, 24, 32)
 Main.Active = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- TITLE BAR (XANH CYAN ĐẬM CHẤT ZYNTRIX)
+-- TITLE BAR
 local TitleBar = Instance.new("Frame", Main)
 TitleBar.Size = UDim2.new(1, 0, 0, 35)
 TitleBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
@@ -179,7 +179,9 @@ local function executeToolScript(url, title)
     end)
 end
 
--- CẤU TRÚC TAB 1: FREE TOOLS
+-- =======================================================
+-- CẤU TRÚC TAB 1: FREE TOOLS (ĐÃ KHÔI PHỤC)
+-- =======================================================
 local toolsData = {
     {Name = "🛠️ Gamepass Tools", URL = "https://rawscripts.net/raw/Universal-Script-Gamepass-Tools-30734"},
     {Name = "🚀 Gravity Coil", URL = "https://rawscripts.net/raw/Universal-Script-Gravity-Coil-script-works-in-all-games-63523"},
@@ -228,14 +230,10 @@ local function loadTab1()
         end)
     end
 end
--- =======================================================
--- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 2/2)
--- =======================================================
--- =======================================================
--- ZYNTRIX PREMIUM PANEL ULTIMATE (PART 2/2 - ESP UPDATE)
--- =======================================================
 
--- CẤU TRÚC TAB 2: PLAYER MODS (CÓ CHỨC NĂNG 11 ZYNTRIX CORE)
+-- =======================================================
+-- CẤU TRÚC TAB 2: PLAYER MODS
+-- =======================================================
 local function createInputRow(scrollParent, labelName, defaultVal, onToggle, isActive, currentVal)
     local Row = Instance.new("Frame", scrollParent)
     Row.Size = UDim2.new(0.96, 0, 0, 30)
@@ -273,12 +271,8 @@ local function createToggleBtn(scrollParent, labelName, isActive, onToggle)
     Btn.MouseButton1Click:Connect(function() sound:Play() onToggle(Btn) end)
 end
 
--- =======================================================
--- HỆ THỐNG ESP QUÉT TỰ ĐỘNG (AUTO-UPDATE HIGHLIGHT & TRACER LINE)
--- =======================================================
+-- HỆ THỐNG ESP
 local Camera = workspace.CurrentCamera
-
--- Hàm xóa ESP của một người chơi cụ thể
 local function removeESP(player)
     if player.Character then
         local oldHighlight = player.Character:FindFirstChild("ZyntrixHighlightESP")
@@ -291,18 +285,12 @@ local function removeESP(player)
     end
 end
 
--- Hàm dọn sạch toàn bộ ESP khi tắt nút
 local function clearAllESP()
-    for _, p in pairs(game.Players:GetPlayers()) do
-        removeESP(p)
-    end
+    for _, p in pairs(game.Players:GetPlayers()) do removeESP(p) end
 end
 
--- Hàm xử lý và cập nhật ESP (Viền + Line khoảng cách) cho từng người chơi
 local function applyESP(p)
     if p == LocalPlayer then return end
-    
-    -- 1. Xử lý phần VIỀN (Highlight)
     if espActive and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
         local hl = p.Character:FindFirstChild("ZyntrixHighlightESP")
         if not hl then
@@ -311,7 +299,6 @@ local function applyESP(p)
             hl.FillColor = Color3.fromRGB(0, 170, 255)
             hl.FillTransparency = 0.6
             hl.OutlineColor = Color3.new(1, 1, 1)
-            hl.OutlineTransparency = 0
             hl.Parent = p.Character
         end
     else
@@ -319,7 +306,6 @@ local function applyESP(p)
         if hl then hl:Destroy() end
     end
 
-    -- 2. Xử lý phần LINE KHOẢNG CÁCH (Tracer Line bằng Drawing API)
     if espActive and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") and p.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
         local line = p:GetAttribute("ZyntrixLine")
         if not line then
@@ -329,44 +315,29 @@ local function applyESP(p)
             line.Transparency = 0.8
             p:SetAttribute("ZyntrixLine", line)
         end
-        
-        -- Cập nhật tọa độ từ chân màn hình đến vị trí người chơi
         local hrp = p.Character.HumanoidRootPart
         local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-        
         if onScreen then
-            line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y) -- Gốc từ giữa cạnh dưới màn hình
+            line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
             line.To = Vector2.new(screenPos.X, screenPos.Y)
             line.Visible = true
-        else
-            line.Visible = false
-        end
+        else line.Visible = false end
     else
-        if p:GetAttribute("ZyntrixLine") then
-            local line = p:GetAttribute("ZyntrixLine")
-            line.Visible = false
-        end
+        if p:GetAttribute("ZyntrixLine") then p:GetAttribute("ZyntrixLine").Visible = false end
     end
 end
 
--- Khởi động vòng lặp tự động cập nhật ESP khi bật
 task.spawn(function()
     while true do
-        task.wait(0.03) -- Chạy mượt mà khoảng 30 FPS để không gây lag máy
+        task.wait(0.03)
         if espActive then
-            for _, p in pairs(game.Players:GetPlayers()) do
-                pcall(function() applyESP(p) end)
-            end
+            for _, p in pairs(game.Players:GetPlayers()) do pcall(function() applyESP(p) end) end
         end
     end
 end)
 
--- Tự động dọn dẹp bộ nhớ khi có người thoát phòng
-game.Players.PlayerRemoving:Connect(function(p)
-    removeESP(p)
-end)
+game.Players.PlayerRemoving:Connect(function(p) removeESP(p) end)
 
--- Giao diện quản lý Tab 2
 local function loadTab2()
     clearContainer()
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 35, 48)
@@ -432,7 +403,6 @@ local function loadTab2()
         btn.Text = "Hitbox: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 120, 180)
     end)
 
-    -- Nút bật tắt hệ thống ESP tự động cập nhật mới
     createToggleBtn(PlayerScroll, "ESP Viền + Line", espActive, function(btn)
         espActive = not espActive
         btn.Text = espActive and "ESP: ON" or "ESP: OFF"
@@ -458,14 +428,11 @@ local function loadTab2()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/ZYNTRIXANDTHIENYEUAF/game.CoreGui/main/Zyntrix"))() 
             end)
             if success then
-                btn.Text = "ZYNTRIX CORE: LOADED"
-                btn.BackgroundColor3 = Color3.fromRGB(0, 170, 120)
+                btn.Text = "ZYNTRIX CORE: LOADED"; btn.BackgroundColor3 = Color3.fromRGB(0, 170, 120)
             else
-                btn.Text = "CORE LOAD FAILED!"
-                btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+                btn.Text = "CORE LOAD FAILED!"; btn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
                 task.wait(1.5)
-                btn.Text = "⚡ EXECUTE ZYNTRIX CORE"
-                btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
+                btn.Text = "⚡ EXECUTE ZYNTRIX CORE"; btn.BackgroundColor3 = Color3.fromRGB(35, 40, 45)
             end
         end)
     end)
@@ -494,81 +461,7 @@ ToggleGuiBtn.MouseButton1Click:Connect(function()
     isVisible = not isVisible
     Main.Visible = isVisible
     ToggleGuiBtn.Text = isVisible and "HIDE" or "SHOW"
-    ToggleGuiBtn.BackgroundColor3 = isVisible and Color3.fromRGB(20, 24, 32) or Color3.fromRGB(0, 170, 255)
-    ToggleGuiBtn.TextColor3 = isVisible and Color3.fromRGB(0, 170, 255) or Color3.new(1, 1, 1)
 end)
 
-local dragging, dragStart, startPos = false, nil, nil
-local UIS = game:GetService("UserInputService")
-
-TitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; dragStart = input.Position; startPos = Main.Position
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
-end)
-
-UIS.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == Enum.KeyCode.G then
-        if sound then sound:Play() end
-        invisibleActive = not invisibleActive
-        applyInvisPartsState()
-        if Main.Visible and Tab2Btn.BackgroundColor3 == Color3.fromRGB(0, 170, 255) then loadTab2() end
-    end
-end)
-
--- VÒNG LẶP HỆ THỐNG LOOPS CHẠY NGẦM
-setupInvisParts()
-
-table.insert(_G.ZyntrixGlobalLoops, game:GetService("RunService").Heartbeat:Connect(function()
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    
-    if hum and hum.Health > 0 then
-        if speedActive then hum.WalkSpeed = speedValue end
-        if jumpActive then hum.JumpPower = jumpValue end
-        if godModeActive then hum.MaxHealth = math.huge; hum.Health = math.huge end
-    end
-    
-    if noclipActive and char then
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
-    end
-    
-    if invisibleActive and root and hum and root.Parent and hum.Parent then
-        local oldCF = root.CFrame
-        local oldOffset = hum.CameraOffset
-        local hiddenCF = oldCF * CFrame.new(0, -200000, 0)
-        root.CFrame = hiddenCF
-        hum.CameraOffset = hiddenCF:ToObjectSpace(CFrame.new(oldCF.Position)).Position
-        game:GetService("RunService").RenderStepped:Wait()
-        if root and hum and root.Parent and hum.Parent then
-            root.CFrame = oldCF; hum.CameraOffset = oldOffset
-        end
-    end
-end))
-
-table.insert(_G.ZyntrixGlobalLoops, UIS.JumpRequest:Connect(function()
-    if infJumpActive then
-        local hum = getHumanoid()
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end))
-
-table.insert(_G.ZyntrixGlobalLoops, LocalPlayer.CharacterAdded:Connect(function()
-    invisibleActive = false; task.wait(0.5); setupInvisParts()
-end))
-
+-- Nạp sẵn Tab 1 khi mở menu lần đầu
 loadTab1()
