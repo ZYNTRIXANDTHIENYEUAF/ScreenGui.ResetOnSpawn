@@ -1,81 +1,130 @@
 -- =======================================================
--- ZYNTRIX PREMIUM HUB V15 - CUSTOMIZED FULL VERSION
+-- ZYNTRIX PREMIUM HUB V15 - ULTIMATE PERFECT EDITION (FULL)
 -- =======================================================
 repeat task.wait() until game.Players.LocalPlayer
 local LocalPlayer = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
-local walkSpeed, jumpPower = 16, 50
-local noclip, infJump, espActive = false, false, false
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
 
--- HÀM FLY TOOL (GIỮ NGUYÊN NHƯ NÍ MUỐN)
-local function runFlyToolScript()
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-    local humanoid = char:WaitForChild("Humanoid")
-    local cam = workspace.CurrentCamera
-    local tool = Instance.new("Tool"); tool.Name = "Fly Tool"; tool.RequiresHandle = false; tool.Parent = LocalPlayer.Backpack
-    local pos, gyro, event
-    tool.Equipped:Connect(function()
-        pos = Instance.new("BodyPosition", root); pos.MaxForce = Vector3.new(math.huge, math.huge, math.huge); pos.P = 100000; pos.D = 1750
-        gyro = Instance.new("BodyGyro", root); gyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge); gyro.P = 100000; gyro.D = 2200
-        event = RunService.Heartbeat:Connect(function()
-            local cf = cam.CFrame.Rotation
-            local dir = cf:VectorToObjectSpace(humanoid.MoveDirection)
-            pos.Position = pos.Position + (cf:VectorToWorldSpace(Vector3.new(dir.X, 0, dir.Z).Unit * dir.Magnitude))
-            gyro.CFrame = cam.CFrame; humanoid.PlatformStand = true
-        end)
-    end)
-    tool.Unequipped:Connect(function() if event then event:Disconnect() end; if pos then pos:Destroy() end; if gyro then gyro:Destroy() end; humanoid.PlatformStand = false end)
+local walkSpeed = 16
+local noclipActive = false
+local infJumpActive = false
+local espActive = false
+
+-- HỆ THỐNG LINE ESP CHUẨN
+local ESPs = {}
+local function createESP(plr)
+    if plr == LocalPlayer or ESPs[plr] then return end
+    local line = Drawing.new("Line")
+    line.Thickness = 1.5
+    line.Transparency = 0.7
+    line.Color = Color3.fromRGB(255, 85, 85)
+    line.Visible = false
+    ESPs[plr] = {Line = line}
 end
+for _, p in ipairs(game.Players:GetPlayers()) do createESP(p) end
+game.Players.PlayerAdded:Connect(createESP)
+game.Players.PlayerRemoving:Connect(function(plr)
+    if ESPs[plr] then
+        pcall(function() ESPs[plr].Line:Remove() end)
+        ESPs[plr] = nil
+    end
+end)
 
--- UI SETUP
+-- UI SETUP (ĐÚNG GU CỦA NÍ)
 local oldGui = game.CoreGui:FindFirstChild("ZyntrixMainGui")
 if oldGui then oldGui:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "ZyntrixMainGui"
-local ToggleGuiBtn = Instance.new("TextButton", ScreenGui); ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30); ToggleGuiBtn.Position = UDim2.new(0, 10, 0.5, -15); ToggleGuiBtn.Text = "HIDE"; ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32); ToggleGuiBtn.TextColor3 = Color3.fromRGB(130, 220, 255); ToggleGuiBtn.Draggable = true
+local ToggleGuiBtn = Instance.new("TextButton", ScreenGui); ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30); ToggleGuiBtn.Position = UDim2.new(0, 10, 0.5, -15); ToggleGuiBtn.Text = "HIDE"; ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32); ToggleGuiBtn.BorderColor3 = Color3.fromRGB(100, 200, 255); ToggleGuiBtn.TextColor3 = Color3.fromRGB(130, 220, 255); ToggleGuiBtn.Font = Enum.Font.GothamBold; ToggleGuiBtn.Draggable = true
 
-local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.BackgroundColor3 = Color3.fromRGB(12, 16, 22); MainFrame.BorderColor3 = Color3.fromRGB(255, 85, 85); MainFrame.BorderSizePixel = 2; MainFrame.Position = UDim2.new(0.5, -110, 0.35, -100); MainFrame.Size = UDim2.new(0, 220, 0, 300); MainFrame.Active = true; MainFrame.Draggable = true 
-Instance.new("TextLabel", MainFrame).Size = UDim2.new(1, 0, 0, 30); MainFrame.TextLabel.Text = "ZYNTRIX PREMIUM"; MainFrame.TextLabel.TextColor3 = Color3.fromRGB(255, 85, 85); MainFrame.TextLabel.BackgroundTransparency = 1
+local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.BackgroundColor3 = Color3.fromRGB(12, 16, 22); MainFrame.BorderColor3 = Color3.fromRGB(255, 85, 85); MainFrame.BorderSizePixel = 2; MainFrame.Position = UDim2.new(0.5, -110, 0.35, -100); MainFrame.Size = UDim2.new(0, 220, 0, 280); MainFrame.Active = true; MainFrame.Draggable = true 
 
-local Tab1Btn = Instance.new("TextButton", MainFrame); Tab1Btn.Size = UDim2.new(0.43, 0, 0, 25); Tab1Btn.Position = UDim2.new(0.05, 0, 0, 35); Tab1Btn.Text = "Tools"; Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 20, 20); Tab1Btn.TextColor3 = Color3.fromRGB(255, 150, 150)
-local Tab2Btn = Instance.new("TextButton", MainFrame); Tab2Btn.Size = UDim2.new(0.43, 0, 0, 25); Tab2Btn.Position = UDim2.new(0.52, 0, 0, 35); Tab2Btn.Text = "Player"; Tab2Btn.BackgroundColor3 = Color3.fromRGB(20, 24, 28); Tab2Btn.TextColor3 = Color3.fromRGB(150, 220, 255)
-local ScrollList = Instance.new("ScrollingFrame", MainFrame); ScrollList.Size = UDim2.new(0.9, 0, 0, 200); ScrollList.Position = UDim2.new(0.05, 0, 0, 70); ScrollList.BackgroundColor3 = Color3.fromRGB(8, 10, 14); ScrollList.ScrollBarThickness = 4; Instance.new("UIListLayout", ScrollList).Padding = UDim.new(0, 4)
+local Title = Instance.new("TextLabel", MainFrame); Title.Size = UDim2.new(1, 0, 0, 30); Title.Text = "ZYNTRIX PREMIUM"; Title.TextColor3 = Color3.fromRGB(255, 85, 85); Title.Font = Enum.Font.GothamBold; Title.BackgroundTransparency = 1
 
--- CÁC HÀM TẠO NÚT/INPUT
+local Tab1Btn = Instance.new("TextButton", MainFrame); Tab1Btn.Size = UDim2.new(0.43, 0, 0, 25); Tab1Btn.Position = UDim2.new(0.05, 0, 0, 35); Tab1Btn.Text = "Tools"; Tab1Btn.BackgroundColor3 = Color3.fromRGB(28, 20, 20); Tab1Btn.BorderColor3 = Color3.fromRGB(200, 50, 50); Tab1Btn.TextColor3 = Color3.fromRGB(255, 150, 150)
+local Tab2Btn = Instance.new("TextButton", MainFrame); Tab2Btn.Size = UDim2.new(0.43, 0, 0, 25); Tab2Btn.Position = UDim2.new(0.52, 0, 0, 35); Tab2Btn.Text = "Player"; Tab2Btn.BackgroundColor3 = Color3.fromRGB(20, 24, 28); Tab2Btn.BorderColor3 = Color3.fromRGB(50, 150, 200); Tab2Btn.TextColor3 = Color3.fromRGB(150, 220, 255)
+
+local ScrollList = Instance.new("ScrollingFrame", MainFrame); ScrollList.Size = UDim2.new(0.9, 0, 0, 180); ScrollList.Position = UDim2.new(0.05, 0, 0, 70); ScrollList.BackgroundColor3 = Color3.fromRGB(8, 10, 14); ScrollList.ScrollBarThickness = 4; Instance.new("UIListLayout", ScrollList).Padding = UDim.new(0, 4)
+
+-- HÀM THÀNH PHẦN
 local function addBtn(txt, func)
-    local b = Instance.new("TextButton", ScrollList); b.Size = UDim2.new(0.95, 0, 0, 24); b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(24, 18, 18); b.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", b).CornerRadius = UDim.new(0, 3); b.MouseButton1Click:Connect(func)
-end
-local function addInput(p, func)
-    local b = Instance.new("TextBox", ScrollList); b.Size = UDim2.new(0.95, 0, 0, 24); b.PlaceholderText = p; b.BackgroundColor3 = Color3.fromRGB(30, 30, 30); b.TextColor3 = Color3.new(1,1,1); b.FocusLost:Connect(function(e) if e then func(b.Text) end end)
+    local b = Instance.new("TextButton", ScrollList); b.Size = UDim2.new(0.95, 0, 0, 24); b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(24, 18, 18); b.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", b).CornerRadius = UDim.new(0, 3)
+    b.MouseButton1Click:Connect(function() func(b) end)
 end
 
--- LOGIC TABS
+local function addInput(p, func)
+    local b = Instance.new("TextBox", ScrollList); b.Size = UDim2.new(0.95, 0, 0, 24); b.PlaceholderText = p; b.BackgroundColor3 = Color3.fromRGB(30, 30, 30); b.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", b).CornerRadius = UDim.new(0, 3)
+    b.FocusLost:Connect(function(e) if e then func(b.Text) end end)
+end
+
 ToggleGuiBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible; ToggleGuiBtn.Text = MainFrame.Visible and "HIDE" or "SHOW" end)
+
+-- QUẢN LÝ TAB (FULL KHÔNG THIẾU MỘT NÚT)
 local function loadTab(tab)
     ScrollList:ClearAllChildren(); Instance.new("UIListLayout", ScrollList).Padding = UDim.new(0, 4)
     if tab == 1 then
-        addBtn("🪂 Fly Tool", runFlyToolScript)
+        addBtn("✈️ Tweened Fly Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tweened-Fly-Tool-by-AGBest-54483"))() end)
         addBtn("🛠️ Gamepass Tools", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gamepass-Tools-30734"))() end)
         addBtn("🚀 Gravity Coil", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gravity-Coil-script-works-in-all-games-63523"))() end)
-        addBtn("⚔️ Sword Fling", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-Classic-Sword-Fling-Tool-16842"))() end)
+        addBtn("❄️ Ice + Jump Coil", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Ahma174/Tool/refs/heads/main/Ice%20Coil%20%2B%20Infinite%20jump%20Coil"))() end)
+        addBtn("⚔️ Sword Fling Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-Classic-Sword-Fling-Tool-16842"))() end)
     else
-        addInput("Speed (Enter)", function(v) walkSpeed = tonumber(v) or 16 end)
-        addInput("Jump (Enter)", function(v) jumpPower = tonumber(v) or 50 end)
-        addBtn("Noclip: "..(noclip and "ON" or "OFF"), function(b) noclip = not noclip; b.Text = "Noclip: "..(noclip and "ON" or "OFF") end)
-        addBtn("Inf Jump", function() infJump = not infJump end)
+        addInput("Speed: (Nhập số rồi Enter)", function(v) walkSpeed = tonumber(v) or 16 end)
+        
+        addBtn("Noclip: " .. (noclipActive and "[ON]" or "[OFF]"), function(b) 
+            noclipActive = not noclipActive 
+            b.Text = "Noclip: " .. (noclipActive and "[ON]" or "[OFF]")
+        end)
+        
+        addBtn("Inf Jump: " .. (infJumpActive and "[ON]" or "[OFF]"), function(b) 
+            infJumpActive = not infJumpActive 
+            b.Text = "Inf Jump: " .. (infJumpActive and "[ON]" or "[OFF]")
+        end)
+        
+        addBtn("ESP Line: " .. (espActive and "[ON]" or "[OFF]"), function(b) 
+            espActive = not espActive 
+            b.Text = "ESP Line: " .. (espActive and "[ON]" or "[OFF]")
+        end)
+
         addBtn("Hitbox Expander", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Mimichan-script-bypass/Test-script/main/Hitbox"))() end)
         addBtn("Fe Anim Pack", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Animation-Pack-FE-88221"))() end)
         addBtn("Gaze Emotes", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gaze-emotes-V1-54374"))() end)
     end
 end
 
+-- VÒNG LẶP HỆ THỐNG RUNTIME
 RunService.Stepped:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed; LocalPlayer.Character.Humanoid.JumpPower = jumpPower
-        if infJump and LocalPlayer.Character.Humanoid:GetState() == Enum.HumanoidStateType.Jumping then LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall) end
+        LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
     end
-    if noclip and LocalPlayer.Character then for _,p in pairs(LocalPlayer.Character:GetChildren()) do if p:IsA("BasePart") then p.CanCollide = false end end end
+    if noclipActive and LocalPlayer.Character then 
+        for _, p in pairs(LocalPlayer.Character:GetChildren()) do 
+            if p:IsA("BasePart") then p.CanCollide = false end 
+        end 
+    end
+    if espActive then
+        for plr, esp in pairs(ESPs) do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+                local pos, onScreen = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+                if onScreen then 
+                    esp.Line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                    esp.Line.To = Vector2.new(pos.X, pos.Y)
+                    esp.Line.Visible = true
+                else esp.Line.Visible = false end
+            else esp.Line.Visible = false end
+        end
+    else
+        for _, esp in pairs(ESPs) do esp.Line.Visible = false end
+    end
+end)
+
+-- NHẢY VÔ HẠN ĐỘC LẬP
+UserInputService.JumpRequest:Connect(function()
+    if infJumpActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+    end
 end)
 
 Tab1Btn.MouseButton1Click:Connect(function() loadTab(1) end)
