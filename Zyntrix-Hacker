@@ -32,11 +32,12 @@ game.Players.PlayerRemoving:Connect(function(plr)
     end
 end)
 
--- UI SETUP (ĐÚNG GU CỦA NÍ)
-local oldGui = game.CoreGui:FindFirstChild("ZyntrixMainGui")
+-- UI SETUP (THAY COREGUI THÀNH PLAYERGUI ĐỂ FIX EXECUTOR)
+local TargetGui = LocalPlayer:WaitForChild("PlayerGui")
+local oldGui = TargetGui:FindFirstChild("ZyntrixMainGui")
 if oldGui then oldGui:Destroy() end
 
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "ZyntrixMainGui"
+local ScreenGui = Instance.new("ScreenGui", TargetGui); ScreenGui.Name = "ZyntrixMainGui"; ScreenGui.ResetOnSpawn = false
 local ToggleGuiBtn = Instance.new("TextButton", ScreenGui); ToggleGuiBtn.Size = UDim2.new(0, 60, 0, 30); ToggleGuiBtn.Position = UDim2.new(0, 10, 0.5, -15); ToggleGuiBtn.Text = "HIDE"; ToggleGuiBtn.BackgroundColor3 = Color3.fromRGB(20, 24, 32); ToggleGuiBtn.BorderColor3 = Color3.fromRGB(100, 200, 255); ToggleGuiBtn.TextColor3 = Color3.fromRGB(130, 220, 255); ToggleGuiBtn.Font = Enum.Font.GothamBold; ToggleGuiBtn.Draggable = true
 
 local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.BackgroundColor3 = Color3.fromRGB(12, 16, 22); MainFrame.BorderColor3 = Color3.fromRGB(255, 85, 85); MainFrame.BorderSizePixel = 2; MainFrame.Position = UDim2.new(0.5, -110, 0.35, -100); MainFrame.Size = UDim2.new(0, 220, 0, 280); MainFrame.Active = true; MainFrame.Draggable = true 
@@ -61,15 +62,15 @@ end
 
 ToggleGuiBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible; ToggleGuiBtn.Text = MainFrame.Visible and "HIDE" or "SHOW" end)
 
--- QUẢN LÝ TAB (ĐÃ VÁ LỖI CÚ PHÁP)
+-- QUẢN LÝ TAB (FULL CHUẨN 100%)
 local function loadTab(tab)
     ScrollList:ClearAllChildren(); Instance.new("UIListLayout", ScrollList).Padding = UDim.new(0, 4)
     if tab == 1 then
         addBtn("✈️ Tweened Fly Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tweened-Fly-Tool-by-AGBest-54483"))() end)
         addBtn("🛠️ Gamepass Tools", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gamepass-Tools-30734"))() end)
         addBtn("🚀 Gravity Coil", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gravity-Coil-script-works-in-all-games-63523"))() end)
-        addBtn("❄️ Ice + Jump Coil", function() loadstring(game:Githubusercontent.com/Ahma174/Tool/refs/heads/main/Ice%20Coil%20%2B%20Infinite%20jump%20Coil"))() end)
-        addBtn("⚔️ Sword Fling Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-Classic-Sword-Fling-Tool-16842"))() end) -- Đã fix ở đây
+        addBtn("❄️ Ice + Jump Coil", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Ahma174/Tool/refs/heads/main/Ice%20Coil%20%2B%20Infinite%20jump%20Coil"))() end)
+        addBtn("⚔️ Sword Fling Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-Classic-Sword-Fling-Tool-16842"))() end)
         addBtn("Admin Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fake-Gamepass-V6-135144"))() end)
     else
         addInput("Speed: (Nhập số rồi Enter)", function(v) walkSpeed = tonumber(v) or 16 end)
