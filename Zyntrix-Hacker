@@ -61,15 +61,16 @@ end
 
 ToggleGuiBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible; ToggleGuiBtn.Text = MainFrame.Visible and "HIDE" or "SHOW" end)
 
--- QUẢN LÝ TAB (FULL KHÔNG THIẾU MỘT NÚT)
+-- QUẢN LÝ TAB (ĐÃ VÁ LỖI CÚ PHÁP)
 local function loadTab(tab)
     ScrollList:ClearAllChildren(); Instance.new("UIListLayout", ScrollList).Padding = UDim.new(0, 4)
     if tab == 1 then
         addBtn("✈️ Tweened Fly Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tweened-Fly-Tool-by-AGBest-54483"))() end)
         addBtn("🛠️ Gamepass Tools", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gamepass-Tools-30734"))() end)
         addBtn("🚀 Gravity Coil", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gravity-Coil-script-works-in-all-games-63523"))() end)
-        addBtn("❄️ Ice + Jump Coil", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Ahma174/Tool/refs/heads/main/Ice%20Coil%20%2B%20Infinite%20jump%20Coil"))() end)
-        addBtn("⚔️ Sword Fling Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-Classic-Sword-Fling-Tool-16842"))() end)
+        addBtn("❄️ Ice + Jump Coil", function() loadstring(game:Githubusercontent.com/Ahma174/Tool/refs/heads/main/Ice%20Coil%20%2B%20Infinite%20jump%20Coil"))() end)
+        addBtn("⚔️ Sword Fling Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FE-Classic-Sword-Fling-Tool-16842"))() end) -- Đã fix ở đây
+        addBtn("Admin Tool", function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fake-Gamepass-V6-135144"))() end)
     else
         addInput("Speed: (Nhập số rồi Enter)", function(v) walkSpeed = tonumber(v) or 16 end)
         
